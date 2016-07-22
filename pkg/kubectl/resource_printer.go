@@ -408,7 +408,7 @@ func (h *HumanReadablePrinter) HandledResources() []string {
 
 // NOTE: When adding a new resource type here, please update the list
 // pkg/kubectl/cmd/get.go to reflect the new resource type.
-var podColumns = []string{"NAME", "READY", "STATUS", "RESTARTS", "AGE"}
+var podColumns = []string{"NAME", "READY", "STATUS", "REASON", "RESTARTS", "AGE"}
 var podTemplateColumns = []string{"TEMPLATE", "CONTAINER(S)", "IMAGE(S)", "PODLABELS"}
 var replicationControllerColumns = []string{"NAME", "DESIRED", "CURRENT", "AGE"}
 var replicaSetColumns = []string{"NAME", "DESIRED", "CURRENT", "AGE"}
@@ -603,11 +603,12 @@ func printPodBase(pod *api.Pod, w io.Writer, options PrintOptions) error {
 	totalContainers := len(pod.Spec.Containers)
 	readyContainers := 0
 
-	reason := string(pod.Status.Phase)
+	status := string(pod.Status.Phase)
 	// if not printing all pods, skip terminated pods (default)
-	if !options.ShowAll && (reason == string(api.PodSucceeded) || reason == string(api.PodFailed)) {
+	if !options.ShowAll && (status == string(api.PodSucceeded) || status == string(api.PodFailed)) {
 		return nil
 	}
+	reason := ""
 	if pod.Status.Reason != "" {
 		reason = pod.Status.Reason
 	}
@@ -670,10 +671,11 @@ func printPodBase(pod *api.Pod, w io.Writer, options PrintOptions) error {
 			return err
 		}
 	}
-	if _, err := fmt.Fprintf(w, "%s\t%d/%d\t%s\t%d\t%s",
+	if _, err := fmt.Fprintf(w, "%s\t%d/%d\t%s\t%s\t%d\t%s",
 		name,
 		readyContainers,
 		totalContainers,
+		status,
 		reason,
 		restarts,
 		translateTimestamp(pod.CreationTimestamp),
