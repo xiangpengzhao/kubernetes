@@ -608,7 +608,7 @@ func printPodBase(pod *api.Pod, w io.Writer, options PrintOptions) error {
 	if !options.ShowAll && (status == string(api.PodSucceeded) || status == string(api.PodFailed)) {
 		return nil
 	}
-	reason := ""
+	reason := "None"
 	if pod.Status.Reason != "" {
 		reason = pod.Status.Reason
 	}
