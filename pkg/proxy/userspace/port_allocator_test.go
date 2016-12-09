@@ -37,9 +37,7 @@ func TestRangeAllocatorEmpty(t *testing.T) {
 func TestRangeAllocatorFullyAllocated(t *testing.T) {
 	r := &net.PortRange{}
 	r.Set("1-1")
-	pra := newPortRangeAllocator(*r)
-	a := pra.(*rangeAllocator)
-
+	a := newPortRangeAllocator(*r)
 	p, err := a.AllocateNext()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -48,26 +46,12 @@ func TestRangeAllocatorFullyAllocated(t *testing.T) {
 		t.Fatalf("unexpected allocated port: %d", p)
 	}
 
-	a.lock.Lock()
-	if bit := a.used.Bit(p - a.Base); bit != 1 {
-		a.lock.Unlock()
-		t.Fatalf("unexpected used bit for allocated port: %d", p)
-	}
-	a.lock.Unlock()
-
 	_, err = a.AllocateNext()
 	if err == nil {
 		t.Fatalf("expected error because of fully-allocated range")
 	}
 
 	a.Release(p)
-	a.lock.Lock()
-	if bit := a.used.Bit(p - a.Base); bit != 0 {
-		a.lock.Unlock()
-		t.Fatalf("unexpected used bit for allocated port: %d", p)
-	}
-	a.lock.Unlock()
-
 	p, err = a.AllocateNext()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -75,12 +59,6 @@ func TestRangeAllocatorFullyAllocated(t *testing.T) {
 	if p != 1 {
 		t.Fatalf("unexpected allocated port: %d", p)
 	}
-	a.lock.Lock()
-	if bit := a.used.Bit(p - a.Base); bit != 1 {
-		a.lock.Unlock()
-		t.Fatalf("unexpected used bit for allocated port: %d", p)
-	}
-	a.lock.Unlock()
 
 	_, err = a.AllocateNext()
 	if err == nil {
@@ -91,8 +69,7 @@ func TestRangeAllocatorFullyAllocated(t *testing.T) {
 func TestRangeAllocator_RandomishAllocation(t *testing.T) {
 	r := &net.PortRange{}
 	r.Set("1-100")
-	pra := newPortRangeAllocator(*r)
-	a := pra.(*rangeAllocator)
+	a := newPortRangeAllocator(*r)
 
 	// allocate all the ports
 	var err error
@@ -102,26 +79,11 @@ func TestRangeAllocator_RandomishAllocation(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if ports[i] < 1 || ports[i] > 100 {
-			t.Fatalf("unexpected allocated port: %d", ports[i])
-		}
-		a.lock.Lock()
-		if bit := a.used.Bit(ports[i] - a.Base); bit != 1 {
-			a.lock.Unlock()
-			t.Fatalf("unexpected used bit for allocated port: %d", ports[i])
-		}
-		a.lock.Unlock()
 	}
 
 	// release them all
 	for i := 0; i < 100; i++ {
 		a.Release(ports[i])
-		a.lock.Lock()
-		if bit := a.used.Bit(ports[i] - a.Base); bit != 0 {
-			a.lock.Unlock()
-			t.Fatalf("unexpected used bit for allocated port: %d", ports[i])
-		}
-		a.lock.Unlock()
 	}
 
 	// allocate the ports again
@@ -131,15 +93,6 @@ func TestRangeAllocator_RandomishAllocation(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if rports[i] < 1 || rports[i] > 100 {
-			t.Fatalf("unexpected allocated port: %d", rports[i])
-		}
-		a.lock.Lock()
-		if bit := a.used.Bit(rports[i] - a.Base); bit != 1 {
-			a.lock.Unlock()
-			t.Fatalf("unexpected used bit for allocated port: %d", rports[i])
-		}
-		a.lock.Unlock()
 	}
 
 	if reflect.DeepEqual(ports, rports) {
