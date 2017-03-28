@@ -658,6 +658,11 @@ func PodSelectorMatches(pod *v1.Pod, meta interface{}, nodeInfo *schedulercache.
 	if node == nil {
 		return false, nil, fmt.Errorf("node not found")
 	}
+
+	if pod.Spec.NodeName == node.Name {
+		return true, nil, nil
+	}
+
 	if podMatchesNodeLabels(pod, node) {
 		return true, nil, nil
 	}
