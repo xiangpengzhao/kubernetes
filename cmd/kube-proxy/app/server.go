@@ -69,6 +69,7 @@ import (
 	"k8s.io/kubernetes/pkg/util/oom"
 	"k8s.io/kubernetes/pkg/util/resourcecontainer"
 	utilsysctl "k8s.io/kubernetes/pkg/util/sysctl"
+	"k8s.io/kubernetes/pkg/version"
 	"k8s.io/kubernetes/pkg/version/verflag"
 
 	"github.com/golang/glog"
@@ -202,12 +203,11 @@ func (o *Options) Validate(args []string) error {
 }
 
 func (o *Options) Run() error {
-	config := o.config
-
+	glog.Infof("%+v", version.Get())
 	if len(o.WriteConfigTo) > 0 {
 		return o.writeConfigFile()
 	}
-
+	config := o.config
 	if len(o.ConfigFile) > 0 {
 		if c, err := o.loadConfigFromFile(o.ConfigFile); err != nil {
 			return err
