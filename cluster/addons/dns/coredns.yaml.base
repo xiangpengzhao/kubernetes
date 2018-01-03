@@ -61,6 +61,7 @@ data:
         health
         kubernetes __PILLAR__DNS__DOMAIN__ __PILLAR__CLUSTER_CIDR__ {
             pods insecure
+            upstream /etc/resolv.conf
         }
         prometheus
         proxy . /etc/resolv.conf

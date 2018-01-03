@@ -61,6 +61,7 @@ data:
         health
         kubernetes $DNS_DOMAIN $SERVICE_CLUSTER_IP_RANGE {
             pods insecure
+            upstream /etc/resolv.conf
         }
         prometheus
         proxy . /etc/resolv.conf

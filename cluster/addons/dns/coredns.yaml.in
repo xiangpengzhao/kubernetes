@@ -61,6 +61,7 @@ data:
         health
         kubernetes {{ pillar['dns_domain'] }} {{ pillar['service_cluster_ip_range'] }} {
             pods insecure
+            upstream /etc/resolv.conf
         }
         prometheus
         proxy . /etc/resolv.conf

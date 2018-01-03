@@ -297,6 +297,7 @@ data:
         health
         kubernetes {{ .DNSDomain }} {{ .ServiceCIDR }} {
            pods insecure
+           upstream /etc/resolv.conf
         }
         prometheus
         proxy . /etc/resolv.conf
